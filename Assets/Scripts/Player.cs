@@ -45,6 +45,8 @@ public class Player : MonoBehaviour
     private bool _footstepFlipFlop = false;
 
     private bool Sprinting => Input.GetKey(KeyCode.LeftShift);
+
+    bool canLookAround = true;
     // Start is called before the first frame update
     void Start()
     {
@@ -54,6 +56,10 @@ public class Player : MonoBehaviour
         GameManager.instance.OnCaptured.AddListener((x) =>
         {
             _counter.text = $"{x}";
+        });
+        GameManager.instance.OnKilled.AddListener(() => {
+            _characterController.enabled = false;
+            canLookAround = false;
         });
     }
 
@@ -121,7 +127,7 @@ public class Player : MonoBehaviour
 
     private void HandleRotation()
     {
-        if (_isHiding)
+        if (_isHiding || !canLookAround)
             return;
 
         float mouseX = Input.GetAxis("Mouse X") * _mouseSensitivity * Time.deltaTime;

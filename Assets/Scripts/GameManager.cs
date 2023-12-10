@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
@@ -53,7 +54,17 @@ public class GameManager : MonoBehaviour
                 x.color = goodColor;
             });
         });
-        OnKilled.AddListener(() => SceneManager.LoadScene(0));
+        OnKilled.AddListener(WaitThenDie);
+    }
+
+    private void WaitThenDie()
+    {
+        IEnumerator Wait()
+        {
+            yield return new WaitForSeconds(1.0f);
+            SceneManager.LoadScene(0);
+        }
+        StartCoroutine(Wait());
     }
 
     private void Update()

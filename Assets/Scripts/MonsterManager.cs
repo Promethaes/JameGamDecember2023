@@ -39,7 +39,7 @@ public class MonsterManager : MonoBehaviour
     {
         IEnumerator WaitThenSpawn()
         {
-            yield return new WaitForSeconds(20.0f);
+            //yield return new WaitForSeconds(20.0f);
             for (int i = 0; i < 8; i++)
             {
                 var monster = Instantiate(monsterPrefab);
