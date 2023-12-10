@@ -93,7 +93,7 @@ Transform:
   m_Children:
   - {fileID: 6349331748143440028}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1857520350633093633
 MonoBehaviour:
@@ -107,7 +107,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f4f48d2faee1be498449d302467f86a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  monsterPrefab: {fileID: 5696202254971673394, guid: c110d679af72f084e88ffe4210b31f6a, type: 3}
+  monsterPrefab: {fileID: 1473155642997251677, guid: c110d679af72f084e88ffe4210b31f6a, type: 3}
   monsterTravelLocations:
   - {fileID: 2921150156857381687}
   - {fileID: 8035924212589037221}
