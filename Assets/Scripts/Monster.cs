@@ -21,6 +21,11 @@ public class Monster : MonoBehaviour
     public GameObject bigBadObject;
     public Material bigBadMaterial;
 
+    [Header("Audio")]
+    [SerializeField] List<AudioSource> cuteSounds = new();
+    [SerializeField] AudioSource badSound;
+    [SerializeField] AudioSource captureSound;
+
     public bool IsBigBad = false;
     public bool IsCaptured = false;
 
@@ -30,12 +35,35 @@ public class Monster : MonoBehaviour
     bool animate = true;
 
     Mesh regularSharedMesh;
+
+    bool BigBad => IsBigBad && GameManager.instance.BigBadActive;
     // Start is called before the first frame update
     void OnEnable()
     {
         int index = Random.Range(0, possibleMeshes.Count);
         GetComponent<MeshFilter>().sharedMesh = possibleMeshes[index];
         regularSharedMesh = possibleMeshes[index];
+        StartPlayMonsterSounds();
+    }
+
+    private void StartPlayMonsterSounds()
+    {
+        IEnumerator PlayMonsterSounds()
+        {
+            while (true)
+            {
+                yield return new WaitForSeconds(Random.Range(1.0f, 3.5f));
+                if (BigBad)
+                    badSound.Play();
+                else
+                {
+                    int index = Random.Range(0, cuteSounds.Count);
+                    cuteSounds[index].Play();
+                }
+            }
+        }
+
+        StartCoroutine(PlayMonsterSounds());
     }
 
     // Update is called once per frame
@@ -43,7 +71,7 @@ public class Monster : MonoBehaviour
     {
         Animate();
 
-        if (IsBigBad && GameManager.instance.BigBadActive)
+        if (BigBad)
         {
             navMeshAgent.SetDestination(FindObjectOfType<Player>().transform.position);
         }
@@ -68,7 +96,7 @@ public class Monster : MonoBehaviour
         navMeshAgent.isStopped = true;
         GetComponent<MeshFilter>().sharedMesh = boxMesh;
         GetComponent<MeshRenderer>().sharedMaterial = boxMaterial;
-
+        captureSound.Play();
 
         IEnumerator WaitThenSurprise()
         {
@@ -83,6 +111,7 @@ public class Monster : MonoBehaviour
                 navMeshAgent.acceleration = 10.0f;
                 GameManager.instance.OnBigBad.Invoke();
                 animate = false;
+                transform.localScale = Vector3.one;
             }
             else
             {

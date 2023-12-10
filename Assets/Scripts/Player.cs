@@ -29,6 +29,7 @@ public class Player : MonoBehaviour
     [SerializeField] TMPro.TextMeshProUGUI _counter;
     [SerializeField] AudioSource _leftFootstep;
     [SerializeField] AudioSource _rightFootstep;
+    [SerializeField] AudioSource _boxThrowSound;
 
     private float _verticalRotation = 0.0f;
 
@@ -110,6 +111,7 @@ public class Player : MonoBehaviour
         physics.AddForce(_camera.transform.forward * _throwStrength);
         var captureBox = box.GetComponent<CaptureBox>();
         captureBox.playerRef = this;
+        _boxThrowSound.Play();
     }
 
     public void OnHitMonster(GameObject monster)
