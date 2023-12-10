@@ -26,7 +26,7 @@ public class Player : MonoBehaviour
     [SerializeField] GameObject _captureBoxPrefab;
     [SerializeField] Transform _boxSpawnPoint;
     [SerializeField] Image _boxCooldownImage;
-
+    [SerializeField] TMPro.TextMeshProUGUI _counter;
     [SerializeField] AudioSource _leftFootstep;
     [SerializeField] AudioSource _rightFootstep;
 
@@ -49,6 +49,11 @@ public class Player : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.Locked;
         _currentStamina = _maxStamina;
+
+        GameManager.instance.OnCaptured.AddListener((x) =>
+        {
+            _counter.text = $"{x}";
+        });
     }
 
     private void Update()
@@ -99,6 +104,8 @@ public class Player : MonoBehaviour
         _boxThrowCurrentCooldown = _boxThrowCooldown;
         var box = Instantiate(_captureBoxPrefab);
         box.transform.position = _boxSpawnPoint.position;
+        box.transform.rotation = Quaternion.FromToRotation(box.transform.forward,transform.forward);
+        box.transform.rotation = box.transform.rotation*Quaternion.AngleAxis(90,Vector3.forward);
         var physics = box.GetComponent<Rigidbody>();
         physics.AddForce(_camera.transform.forward * _throwStrength);
         var captureBox = box.GetComponent<CaptureBox>();
@@ -107,7 +114,7 @@ public class Player : MonoBehaviour
 
     public void OnHitMonster(GameObject monster)
     {
-
+        monster.GetComponent<Monster>()?.OnCapture();
     }
 
     private void HandleRotation()
@@ -148,7 +155,7 @@ public class Player : MonoBehaviour
         var result = forward + right;
         result = result.normalized;
 
-        if(result.magnitude != 0)
+        if (result.magnitude != 0)
             PlayFootstepSounds();
 
         var multiplier = _movementSpeedMultiplier;
