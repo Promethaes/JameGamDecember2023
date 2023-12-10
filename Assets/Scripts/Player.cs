@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
 
 public class Player : MonoBehaviour
@@ -30,12 +28,13 @@ public class Player : MonoBehaviour
     [SerializeField] AudioSource _leftFootstep;
     [SerializeField] AudioSource _rightFootstep;
     [SerializeField] AudioSource _boxThrowSound;
+    [SerializeField] CapsuleCollider _collider;
 
     private float _verticalRotation = 0.0f;
 
     private float _currentStamina = 100.0f;
 
-    private bool _isHiding = false;
+    public bool IsHiding = false;
 
     private float _boxThrowCurrentCooldown = 0.0f;
 
@@ -57,7 +56,8 @@ public class Player : MonoBehaviour
         {
             _counter.text = $"{x}";
         });
-        GameManager.instance.OnKilled.AddListener(() => {
+        GameManager.instance.OnKilled.AddListener(() =>
+        {
             _characterController.enabled = false;
             canLookAround = false;
         });
@@ -67,7 +67,7 @@ public class Player : MonoBehaviour
     {
         UpdateBoxThrowCooldown();
         UpdateStaminaBar();
-        TryThrowBox();
+        HandleInteractButton();
         HandleRotation();
     }
 
@@ -102,17 +102,47 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void TryThrowBox()
+    Locker _locker = null;
+    private void HandleLocker()
     {
-        if (!Input.GetKeyDown(KeyCode.E) || _boxThrowCurrentCooldown > 0.0f)
+        if (!IsHiding)
         {
-            return;
+            if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 10.0f))
+            {
+                if (hit.collider.gameObject.CompareTag("Locker"))
+                {
+                    var locker = hit.collider.gameObject.GetComponent<Locker>();
+                    locker.OnEnterLocker();
+                    _camera.gameObject.SetActive(false);
+                    _collider.enabled = false;
+                    _locker = locker;
+                    IsHiding = true;
+                }
+            }
         }
+        else
+        {
+            _camera.gameObject.SetActive(true);
+            _collider.enabled = true;
+            _locker.OnExitLocker();
+            IsHiding = false;
+        }
+    }
+
+    private void HandleInteractButton()
+    {
+        if (!Input.GetKeyDown(KeyCode.E))
+            return;
+
+        HandleLocker();
+
+        if (IsHiding || _boxThrowCurrentCooldown > 0.0f)
+            return;
         _boxThrowCurrentCooldown = _boxThrowCooldown;
         var box = Instantiate(_captureBoxPrefab);
         box.transform.position = _boxSpawnPoint.position;
-        box.transform.rotation = Quaternion.FromToRotation(box.transform.forward,transform.forward);
-        box.transform.rotation = box.transform.rotation*Quaternion.AngleAxis(90,Vector3.forward);
+        box.transform.rotation = Quaternion.FromToRotation(box.transform.forward, transform.forward);
+        box.transform.rotation = box.transform.rotation * Quaternion.AngleAxis(90, Vector3.forward);
         var physics = box.GetComponent<Rigidbody>();
         physics.AddForce(_camera.transform.forward * _throwStrength);
         var captureBox = box.GetComponent<CaptureBox>();
@@ -127,7 +157,7 @@ public class Player : MonoBehaviour
 
     private void HandleRotation()
     {
-        if (_isHiding || !canLookAround)
+        if (IsHiding || !canLookAround)
             return;
 
         float mouseX = Input.GetAxis("Mouse X") * _mouseSensitivity * Time.deltaTime;
@@ -142,7 +172,7 @@ public class Player : MonoBehaviour
 
     private void HandleMovement()
     {
-        if (_isHiding)
+        if (IsHiding)
             return;
 
         var xDirection = 0;

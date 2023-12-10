@@ -591,6 +591,7 @@ MonoBehaviour:
   _leftFootstep: {fileID: 7859079511009482633}
   _rightFootstep: {fileID: 6061540084767123034}
   _boxThrowSound: {fileID: 737209923466502415}
+  _collider: {fileID: 5268771542640108251}
 --- !u!143 &5118971589632260831
 CharacterController:
   m_ObjectHideFlags: 0
