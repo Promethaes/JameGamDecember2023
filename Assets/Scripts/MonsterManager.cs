@@ -7,7 +7,7 @@ public class MonsterManager : MonoBehaviour
 {
     [Header("References")]
     [SerializeField] Monster monsterPrefab;
-    [SerializeField] List<Transform> monsterTravelLocations = new();
+    public List<Transform> monsterTravelLocations = new();
     List<Monster> monsters = new();
     private void Start()
     {
@@ -37,21 +37,29 @@ public class MonsterManager : MonoBehaviour
 
     private void SpawnMonsters()
     {
+        SpawnMonster();
+        StartUpdateMonsterDestinations();
+        StartBigBadCheck();
         IEnumerator WaitThenSpawn()
         {
-            //yield return new WaitForSeconds(20.0f);
-            for (int i = 0; i < 8; i++)
+            while (true)
             {
-                var monster = Instantiate(monsterPrefab);
-                monsters.Add(monster);
-                int index = Random.Range(0, monsterTravelLocations.Count);
-                monster.transform.position = monsterTravelLocations[index].position;
+                yield return new WaitForSeconds(10.0f);
+                SpawnMonster();
+                SpawnMonster();
             }
-            StartUpdateMonsterDestinations();
-            StartBigBadCheck();
-            yield return null;
         }
         StartCoroutine(WaitThenSpawn());
+    }
+
+    private void SpawnMonster()
+    {
+        if (monsters.Count >= 8)
+            return;
+        var monster = Instantiate(monsterPrefab);
+        monsters.Add(monster);
+        int index = Random.Range(0, monsterTravelLocations.Count);
+        monster.transform.position = monsterTravelLocations[index].position;
     }
 
     private void StartUpdateMonsterDestinations()
@@ -86,11 +94,11 @@ public class MonsterManager : MonoBehaviour
         {
             while (true)
             {
-                yield return new WaitForSeconds(3.0f);
+                yield return new WaitForSeconds(5.0f);
 
                 RemoveCheck();
 
-                if (GameManager.instance.BigBadActive)
+                if (GameManager.instance.BigBadActive || monsters.Count == 1)
                     continue;
 
                 monsters.Where(x => !x.IsCaptured).ToList().ForEach(x => x.IsBigBad = false);

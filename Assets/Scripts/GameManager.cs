@@ -24,6 +24,8 @@ public class GameManager : MonoBehaviour
     public UnityEvent OnKilled;
     public UnityEvent OnBigBad;
     public UnityEvent OnReturnToNormal;
+    public UnityEvent OnPlayerHide;
+    public UnityEvent OnPlayerReturn;
     public static GameManager instance;
 
     public bool BigBadActive = false;
@@ -54,6 +56,7 @@ public class GameManager : MonoBehaviour
                 x.color = goodColor;
             });
         });
+        OnAllCaptured.AddListener(() => SceneManager.LoadScene(0));
         OnKilled.AddListener(WaitThenDie);
     }
 

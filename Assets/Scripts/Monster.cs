@@ -25,6 +25,7 @@ public class Monster : MonoBehaviour
     [SerializeField] List<AudioSource> cuteSounds = new();
     [SerializeField] AudioSource badSound;
     [SerializeField] AudioSource captureSound;
+    [SerializeField] AudioSource shakySound;
 
     public bool IsBigBad = false;
     public bool IsCaptured = false;
@@ -44,6 +45,19 @@ public class Monster : MonoBehaviour
         GetComponent<MeshFilter>().sharedMesh = possibleMeshes[index];
         regularSharedMesh = possibleMeshes[index];
         StartPlayMonsterSounds();
+
+        GameManager.instance.OnReturnToNormal.AddListener(() =>
+        {
+            IsCaptured = false;
+            bigBadObject.SetActive(false);
+            GetComponent<MeshRenderer>().enabled = true;
+            navMeshAgent.isStopped = false;
+            navMeshAgent.speed = 5.82f;
+            navMeshAgent.acceleration = 0.0f;
+            transform.localScale = Vector3.one;
+            animate = true;
+            GetComponent<MeshFilter>().mesh = regularSharedMesh;
+        });
     }
 
     private void StartPlayMonsterSounds()
@@ -71,7 +85,7 @@ public class Monster : MonoBehaviour
     {
         Animate();
 
-        if (BigBad)
+        if (BigBad && !FindObjectOfType<Player>().IsHiding)
         {
             navMeshAgent.SetDestination(FindObjectOfType<Player>().transform.position);
         }
@@ -97,7 +111,7 @@ public class Monster : MonoBehaviour
         GetComponent<MeshFilter>().sharedMesh = boxMesh;
         GetComponent<MeshRenderer>().sharedMaterial = boxMaterial;
         captureSound.Play();
-
+        shakySound.Play();
         IEnumerator WaitThenSurprise()
         {
             yield return new WaitForSeconds(3.0f);
@@ -120,7 +134,8 @@ public class Monster : MonoBehaviour
             }
         }
         StartCoroutine(WaitThenSurprise());
-        GameManager.instance.OnSuccessfulCapture();
+        if (!IsBigBad)
+            GameManager.instance.OnSuccessfulCapture();
 
     }
 

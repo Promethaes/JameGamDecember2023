@@ -29,6 +29,7 @@ public class Player : MonoBehaviour
     [SerializeField] AudioSource _rightFootstep;
     [SerializeField] AudioSource _boxThrowSound;
     [SerializeField] CapsuleCollider _collider;
+    [SerializeField] GameObject _objective;
 
     private float _verticalRotation = 0.0f;
 
@@ -61,6 +62,13 @@ public class Player : MonoBehaviour
             _characterController.enabled = false;
             canLookAround = false;
         });
+
+        IEnumerator DisableObjective()
+        {
+            yield return new WaitForSeconds(3.0f);
+            _objective.SetActive(false);
+        }
+        StartCoroutine(DisableObjective());
     }
 
     private void Update()
@@ -117,11 +125,13 @@ public class Player : MonoBehaviour
                     _collider.enabled = false;
                     _locker = locker;
                     IsHiding = true;
+                    GameManager.instance.OnPlayerHide.Invoke();
                 }
             }
         }
         else
         {
+            GameManager.instance.OnPlayerReturn.Invoke();
             _camera.gameObject.SetActive(true);
             _collider.enabled = true;
             _locker.OnExitLocker();

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -18,6 +19,14 @@ public class BigBad : MonoBehaviour
             GameManager.instance.OnReturnToNormal.Invoke();
         }
         StartCoroutine(Despawn());
+
+        GameManager.instance.OnPlayerHide.AddListener(() =>
+        {
+            var monsterManager = FindObjectOfType<MonsterManager>();
+            int index = Random.Range(0, monsterManager.monsterTravelLocations.Count);
+            navMeshAgent.SetDestination(monsterManager.monsterTravelLocations[index].position);
+        });
+
     }
 
     private void OnTriggerEnter(Collider other)
